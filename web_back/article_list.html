@@ -24,11 +24,11 @@
                 <div class="col-xs-6">
                     <form class="form-inline">
                         <select id="selCategory" name="" class="form-control input-sm">
-                            <option>所有分类</option>
-                            <option>未分类</option>
+                            <option value="">所有分类</option>
+                            <!-- <option>未分类</option>
                             <option>奇趣事</option>
                             <option>会生活</option>
-                            <option>爱旅行</option>
+                            <option>爱旅行</option> -->
                         </select>
                         <select id="selStatus" name="" class="form-control input-sm">
                             <option value="">所有状态</option>
@@ -293,37 +293,96 @@
         {{/each}}
     </script>
 
+
+    <script id="cateGory" type="text/html">
+        {{each data}}
+            <option value="{{$value.id}}">{{$value.name}}</option>
+        {{/each}}
+    </script>
+
     <script>
         $(function () {
             var myPage;
+            var myTotalPage;
+
+            var $pagination = $('.pagination');
+            var defaultOpts = {
+                // totalPages: myTotalPage,
+                first: '第一页',
+                last: '尾页',
+                prev: '上一页',
+                next: '下一页',
+                onPageClick: function (evt, page) {
+                    $('#content').text('Page ' + page);
+
+                    myPage = page;
+
+                    getData();
+
+                }
+            };
+            $pagination.twbsPagination(defaultOpts);
+
+
+            
             function getData() {
                 $.ajax({
                     url: 'http://localhost:8000/admin/search',
                     type: 'get',
-                    data:{
-                        page:myPage,
-                        perpage:10,
-                        state:$('#selStatus').val(),
+                    data: {
+                        page: myPage,
+                        perpage: 10,
+                        state: $('#selStatus').val(),
+                        type: $('#selCategory').val(),
                     },
                     success: function (backData) {
                         console.log(backData);
-                        
-                        
+
+
                         $('tbody').html(template('list', backData));
+
+                        // $('#selCategory').append(template('cateGory',backData))
+                        
+                        
+
+                        if (myTotalPage != backData.totalPage) {
+                            myTotalPage = backData.totalPage;
+                            var currentPage = 1;
+                            $pagination.twbsPagination('destroy');
+                            $pagination.twbsPagination($.extend({}, defaultOpts, {
+                                startPage: currentPage,
+                                totalPages: myTotalPage
+                            }));
+                        }
+                        // var totalPages = backData.totalPage;
+
 
                     }
 
-                    
+
                 });
 
-                
+
 
             }
 
-            
-        
-            
-            
+
+            $.ajax({
+                url: 'http://localhost:8000/admin/category_search',
+                type: 'get',
+                success: function (backData) {
+                    $('#selCategory').append(template('cateGory', backData))
+                }
+
+            });
+
+
+
+
+
+
+
+
 
             // function getCategory() {
             //     $.ajax({
@@ -340,30 +399,14 @@
 
             // getCategory();
 
-        
-           
-            
-
-            var $pagination = $('.pagination');
-            var defaultOpts = {
-                totalPages:20,
-                first: '第一页',
-                last: '尾页',
-                prev: '上一页',
-                next: '下一页',
-                onPageClick: function (evt, page) {
-                    $('#content').text('Page ' + page);
-                    
-                    myPage = page;
-
-                    getData();
-
-                }
-            };
-            $pagination.twbsPagination(defaultOpts);
 
 
-            $('#btnSearch').click(function(e){
+
+
+
+
+
+            $('#btnSearch').click(function (e) {
                 e.preventDefault();
                 getData();
             });
