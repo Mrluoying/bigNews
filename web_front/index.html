@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <script src="./js/jquery-1.12.4.min.js"></script>
 </head>
 
 <body>
@@ -30,12 +31,12 @@
                 <a href="javascript:;" class="level_one"><i class="fa fa-list-ul"></i>全部分类</a>
                 <ul class="level_two">
                     <li class="up"></li>
-                    <li><a href="#">最 新</a></li>
+                    <!-- <li><a href="#">最 新</a></li>
                     <li><a href="#">科 技</a></li>
                     <li><a href="#">股 市</a></li>
                     <li><a href="#">商 品</a></li>
                     <li><a href="#">外 汇</a></li>
-                    <li><a href="#">公 司</a></li>
+                    <li><a href="#">公 司</a></li> -->
                 </ul>
             </div>
             <ul class="left_menu fl">
@@ -215,12 +216,86 @@
             <span>|</span>
             <a href="#">招聘人才</a>
             <span>|</span>
-            <a href="#">友情链接</a>		
+            <a href="#">友情链接</a>
         </div>
-        <p>CopyRight © 2019 深圳大事件信息技术股份有限公司   All Rights Reserved</p>
-        <p>电话：0755-****888    粤ICP备*******8号</p>
+        <p>CopyRight © 2019 深圳大事件信息技术股份有限公司 All Rights Reserved</p>
+        <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
 
 </body>
+<script src="./js/template.js"></script>
+<script id="cateGory" type="text/html">
+    {{each data}}
+        <li><a href='#'>{{$value.name}}</a></li>
+    {{/each}}
+</script>
+
+<script id="article" type="text/html">
+    {{each data}}
+        {{if $index==0}}
+            <li class="first">
+        {{else}}
+            <li>
+        {{/if}}
+            <a href="./article.html?id={{$value.id}}"><img src="{{$value.cover}}" alt=""></a>
+            <p>{{$value.title}}</p>
+        </li>
+    {{/each}}
+</script>
+
+<script id="content" type="text/html">
+    {{each data}}
+        <div class="common_news_list">
+            <a href="#" class="list_pic"><img src="{{$value.cover}}" alt=""></a>
+            <h4><a href="#">{{$value.title}} </a></h4>
+            <p>{{@$value.content}}
+            </p>
+            <div class="new_info">
+                <span>标签：{{$value.type}}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<i class="fa fa-eye"></i>&nbsp;阅读( {{$value.read}}
+                    )&nbsp;&nbsp;&nbsp;<i class="fa fa-commenting"></i>&nbsp;评论( {{$value.comment}} )</span>
+                <b>发布于 {{$value.date}}</b>
+            </div>
+        </div>
+    {{/each}}
+</script>
+
+<script>
+    $(function(){
+        $.ajax({
+            url:'http://localhost:8000/admin/category_search',
+            type:'get',
+            success:function(backData){
+                $('.left_menu').html('');
+                $('.left_menu').html(template('cateGory',backData))
+
+                $('.level_two').append(template('cateGory',backData))
+            }
+        });
+
+
+
+        $.ajax({
+            url:'http://localhost:8000/admin/search',
+            type:'get',
+            data:{
+                page:1,
+                perpage:5
+            },
+            success:function(backData){
+                console.log(backData);
+                $('.focus_list').html(template('article',backData));
+
+                $('.common_news_list').remove();
+
+                $(template('content',backData)).appendTo($('.left_con'))
+            }
+
+        });
+
+
+
+
+    });
+</script>
 
 </html>
